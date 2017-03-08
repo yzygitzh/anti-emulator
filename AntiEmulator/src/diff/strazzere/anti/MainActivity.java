@@ -4,10 +4,13 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.TextView;
+
 import diff.strazzere.anti.debugger.FindDebugger;
 import diff.strazzere.anti.emulator.FindEmulator;
 import diff.strazzere.anti.monkey.FindMonkey;
@@ -15,16 +18,28 @@ import diff.strazzere.anti.taint.FindTaint;
 
 public class MainActivity extends Activity {
     static final int REQUEST_CODE_READ_PHONE_STATE = 0;
+    static TextView displayTextView;
 
     void detectSandbox() {
+        final Handler textHandler = new Handler();
         new Thread() {
             @Override
             public void run() {
             super.run();
-            isTaintTrackingDetected();
-            isMonkeyDetected();
-            isDebugged();
-            isQEmuEnvDetected();
+            final boolean taintTrackingDetected = isTaintTrackingDetected();
+            final boolean monkeyDetected = isMonkeyDetected();
+            final boolean debugged = isDebugged();
+            final boolean QEmuEnvDetected = isQEmuEnvDetected();
+            textHandler.post(new Runnable() {
+                public void run() {
+                    displayTextView.setText(
+                        "isTaintTrackingDetected: " + taintTrackingDetected + "\n" +
+                        "isMonkeyDetected: " + monkeyDetected + "\n" +
+                        "isDebugged: " + debugged + "\n" +
+                        "isQEmuEnvDetected: " + QEmuEnvDetected + "\n"
+                    );
+                }
+            });
             }
         }.start();
     }
@@ -33,6 +48,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        displayTextView = (TextView)findViewById(R.id.display_text_view);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
             != PackageManager.PERMISSION_GRANTED) {
