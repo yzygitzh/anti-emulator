@@ -1,7 +1,11 @@
 package diff.strazzere.anti;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import diff.strazzere.anti.debugger.FindDebugger;
@@ -10,26 +14,44 @@ import diff.strazzere.anti.monkey.FindMonkey;
 import diff.strazzere.anti.taint.FindTaint;
 
 public class MainActivity extends Activity {
+    static final int REQUEST_CODE_READ_PHONE_STATE = 0;
+
+    void detectSandbox() {
+        new Thread() {
+            @Override
+            public void run() {
+            super.run();
+            isTaintTrackingDetected();
+            isMonkeyDetected();
+            isDebugged();
+            isQEmuEnvDetected();
+            }
+        }.start();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                isTaintTrackingDetected();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE_READ_PHONE_STATE);
+        } else {
+            detectSandbox();
+        }
+    }
 
-                isMonkeyDetected();
-
-                isDebugged();
-
-                isQEmuEnvDetected();
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_READ_PHONE_STATE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    detectSandbox();
+                }
+                return;
             }
-        }.start();
+        }
     }
 
     @Override

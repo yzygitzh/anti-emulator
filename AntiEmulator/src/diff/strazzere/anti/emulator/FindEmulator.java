@@ -159,14 +159,17 @@ public class FindEmulator {
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         String deviceId = telephonyManager.getDeviceId();
+        boolean retVal = true;
 
         for (String known_deviceId : known_device_ids) {
             if (known_deviceId.equalsIgnoreCase(deviceId)) {
-                return true;
+                // return true;
+                return retVal;
             }
-
         }
-        return false;
+        retVal = false;
+        return retVal;
+        //return false;
     }
 
     public static boolean hasKnownImsi(Context context) {
