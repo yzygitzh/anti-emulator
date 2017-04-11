@@ -26,6 +26,7 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
             super.run();
+            final String threadName = Thread.currentThread().getName();
             final boolean taintTrackingDetected = isTaintTrackingDetected();
             final boolean monkeyDetected = isMonkeyDetected();
             final boolean debugged = isDebugged();
@@ -33,6 +34,7 @@ public class MainActivity extends Activity {
             textHandler.post(new Runnable() {
                 public void run() {
                     displayTextView.setText(
+                        "threadName: " + threadName + "\n" +
                         "isTaintTrackingDetected: " + taintTrackingDetected + "\n" +
                         "isMonkeyDetected: " + monkeyDetected + "\n" +
                         "isDebugged: " + debugged + "\n" +
@@ -64,6 +66,9 @@ public class MainActivity extends Activity {
         switch (requestCode) {
             case REQUEST_CODE_READ_PHONE_STATE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    detectSandbox();
+                }
+                else {
                     detectSandbox();
                 }
                 return;
