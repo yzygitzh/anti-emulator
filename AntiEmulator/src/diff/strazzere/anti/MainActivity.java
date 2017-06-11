@@ -20,6 +20,14 @@ public class MainActivity extends Activity {
     static final int REQUEST_CODE_READ_PHONE_STATE = 0;
     static TextView displayTextView;
 
+    void detectedLog(String logStr) {
+        log(logStr);
+    }
+
+    void unDetectedLog(String logStr) {
+        log(logStr);
+    }
+
     void detectSandbox() {
         final Handler textHandler = new Handler();
         new Thread() {
@@ -96,17 +104,19 @@ public class MainActivity extends Activity {
         log("hasGenyFiles : " + FindEmulator.hasGenyFiles());
         log("hasEmulatorAdb :" + FindEmulator.hasEmulatorAdb());
         log("hitsQemuBreakpoint : " + FindEmulator.checkQemuBreakpoint());
-        if (FindEmulator.hasKnownDeviceId(getApplicationContext())
-                        || FindEmulator.hasKnownImsi(getApplicationContext())
-                        || FindEmulator.hasEmulatorBuild(getApplicationContext())
-                        || FindEmulator.hasKnownPhoneNumber(getApplicationContext()) || FindEmulator.hasPipes()
-                        || FindEmulator.hasQEmuDrivers() || FindEmulator.hasEmulatorAdb()
-                        || FindEmulator.hasQEmuFiles()
-                        || FindEmulator.hasGenyFiles()) {
-            log("QEmu environment detected.");
+        if (FindEmulator.hasKnownDeviceId(getApplicationContext()) ||
+            FindEmulator.hasKnownImsi(getApplicationContext()) ||
+            FindEmulator.hasEmulatorBuild(getApplicationContext()) ||
+            FindEmulator.hasKnownPhoneNumber(getApplicationContext()) ||
+            FindEmulator.hasPipes() ||
+            FindEmulator.hasQEmuDrivers() ||
+            FindEmulator.hasEmulatorAdb() ||
+            FindEmulator.hasQEmuFiles() ||
+            FindEmulator.hasGenyFiles()) {
+            detectedLog("QEmu environment detected.");
             return true;
         } else {
-            log("QEmu environment not detected.");
+            unDetectedLog("QEmu environment not detected.");
             return false;
         }
     }
@@ -116,12 +126,13 @@ public class MainActivity extends Activity {
         log("hasAppAnalysisPackage : " + FindTaint.hasAppAnalysisPackage(getApplicationContext()));
         log("hasTaintClass : " + FindTaint.hasTaintClass());
         log("hasTaintMemberVariables : " + FindTaint.hasTaintMemberVariables());
-        if (FindTaint.hasAppAnalysisPackage(getApplicationContext()) || FindTaint.hasTaintClass()
-                        || FindTaint.hasTaintMemberVariables()) {
-            log("Taint tracking was detected.");
+        if (FindTaint.hasAppAnalysisPackage(getApplicationContext()) ||
+            FindTaint.hasTaintClass() ||
+            FindTaint.hasTaintMemberVariables()) {
+            detectedLog("Taint tracking was detected.");
             return true;
         } else {
-            log("Taint tracking was not detected.");
+            unDetectedLog("Taint tracking was not detected.");
             return false;
         }
     }
@@ -131,10 +142,10 @@ public class MainActivity extends Activity {
         log("isUserAMonkey : " + FindMonkey.isUserAMonkey());
 
         if (FindMonkey.isUserAMonkey()) {
-            log("Monkey user was detected.");
+            detectedLog("Monkey user was detected.");
             return true;
         } else {
-            log("Monkey user was not detected.");
+            unDetectedLog("Monkey user was not detected.");
             return false;
         }
     }
@@ -150,10 +161,10 @@ public class MainActivity extends Activity {
         }
 
         if (FindDebugger.isBeingDebugged() || tracer) {
-            log("Debugger was detected");
+            detectedLog("Debugger was detected");
             return true;
         } else {
-            log("No debugger was detected.");
+            unDetectedLog("No debugger was detected.");
             return false;
         }
     }
