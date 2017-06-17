@@ -39,31 +39,30 @@ public class MainActivity extends Activity {
         new Thread() {
             @Override
             public void run() {
-            super.run();
-            final String threadName = Thread.currentThread().getName();
-            final boolean taintTrackingDetected = isTaintTrackingDetected();
-            final boolean monkeyDetected = isMonkeyDetected();
-            final boolean debugged = isDebugged();
-            final boolean QEmuEnvDetected = isQEmuEnvDetected();
-            FindSlowGraphic.sampleFPS(mTimingView.getGLTimingRenderer());
-            final double graphicLowestFPS = FindSlowGraphic.getLowestFPS();
-            final double graphicHighestFPS = FindSlowGraphic.getHighestFPS();
-            final boolean slowGraphicDetected = FindSlowGraphic.isSlowGraphic();
+                super.run();
+                final String threadName = Thread.currentThread().getName();
+                final boolean taintTrackingDetected = isTaintTrackingDetected();
+                final boolean monkeyDetected = isMonkeyDetected();
+                final boolean debugged = isDebugged();
+                final boolean QEmuEnvDetected = isQEmuEnvDetected();
+                final boolean slowGraphicDetected = isSlowGraphic();
+                final double graphicLowestFPS = FindSlowGraphic.getLowestFPS();
+                final double graphicHighestFPS = FindSlowGraphic.getHighestFPS();
 
-            textHandler.post(new Runnable() {
-                public void run() {
-                    mTextView.setText(
-                        "threadName: " + threadName + "\n" +
-                        "isTaintTrackingDetected: " + taintTrackingDetected + "\n" +
-                        "isMonkeyDetected: " + monkeyDetected + "\n" +
-                        "isDebugged: " + debugged + "\n" +
-                        "isQEmuEnvDetected: " + QEmuEnvDetected + "\n" +
-                        "graphicLowestFPS: " + graphicLowestFPS + "\n" +
-                        "graphicHighestFPS: " + graphicHighestFPS + "\n" +
-                        "slowGraphicDetected: " + slowGraphicDetected + "\n"
-                    );
-                }
-            });
+                textHandler.post(new Runnable() {
+                    public void run() {
+                        mTextView.setText(
+                            "threadName: " + threadName + "\n" +
+                            "isTaintTrackingDetected: " + taintTrackingDetected + "\n" +
+                            "isMonkeyDetected: " + monkeyDetected + "\n" +
+                            "isDebugged: " + debugged + "\n" +
+                            "isQEmuEnvDetected: " + QEmuEnvDetected + "\n" +
+                            "graphicLowestFPS: " + graphicLowestFPS + "\n" +
+                            "graphicHighestFPS: " + graphicHighestFPS + "\n" +
+                            "slowGraphicDetected: " + slowGraphicDetected + "\n"
+                        );
+                    }
+                });
             }
         }.start();
     }
@@ -181,6 +180,18 @@ public class MainActivity extends Activity {
             return true;
         } else {
             unDetectedLog("No debugger was detected.");
+            return false;
+        }
+    }
+
+    public boolean isSlowGraphic() {
+        log("Checking for slow graphic...");
+        FindSlowGraphic.sampleFPS(mTimingView.getGLTimingRenderer());
+        if (FindSlowGraphic.isSlowGraphic()) {
+            detectedLog("Slow graphic was detected");
+            return true;
+        } else {
+            unDetectedLog("Slow graphic was detected");
             return false;
         }
     }
