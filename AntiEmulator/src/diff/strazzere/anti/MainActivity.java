@@ -8,17 +8,23 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import diff.strazzere.anti.debugger.FindDebugger;
 import diff.strazzere.anti.emulator.FindEmulator;
 import diff.strazzere.anti.monkey.FindMonkey;
 import diff.strazzere.anti.taint.FindTaint;
+import diff.strazzere.anti.timing.FindSlowGraphic;
+import diff.strazzere.anti.timing.GLTimingView;
 
 public class MainActivity extends Activity {
     static final int REQUEST_CODE_READ_PHONE_STATE = 0;
-    static TextView displayTextView;
+    static TextView mTextView;
+    static GLTimingView mTimingView;
 
     void detectedLog(String logStr) {
         log(logStr);
@@ -39,14 +45,22 @@ public class MainActivity extends Activity {
             final boolean monkeyDetected = isMonkeyDetected();
             final boolean debugged = isDebugged();
             final boolean QEmuEnvDetected = isQEmuEnvDetected();
+            FindSlowGraphic.sampleFPS(mTimingView.getGLTimingRenderer());
+            final double graphicLowestFPS = FindSlowGraphic.getLowestFPS();
+            final double graphicHighestFPS = FindSlowGraphic.getHighestFPS();
+            final boolean slowGraphicDetected = FindSlowGraphic.isSlowGraphic();
+
             textHandler.post(new Runnable() {
                 public void run() {
-                    displayTextView.setText(
+                    mTextView.setText(
                         "threadName: " + threadName + "\n" +
                         "isTaintTrackingDetected: " + taintTrackingDetected + "\n" +
                         "isMonkeyDetected: " + monkeyDetected + "\n" +
                         "isDebugged: " + debugged + "\n" +
-                        "isQEmuEnvDetected: " + QEmuEnvDetected + "\n"
+                        "isQEmuEnvDetected: " + QEmuEnvDetected + "\n" +
+                        "graphicLowestFPS: " + graphicLowestFPS + "\n" +
+                        "graphicHighestFPS: " + graphicHighestFPS + "\n" +
+                        "slowGraphicDetected: " + slowGraphicDetected + "\n"
                     );
                 }
             });
@@ -59,7 +73,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        displayTextView = (TextView)findViewById(R.id.display_text_view);
+        mTextView = (TextView)findViewById(R.id.display_text_view);
+
+        LinearLayout container = (LinearLayout) findViewById(R.id.main_container);
+        mTimingView = new GLTimingView(this);
+        container.addView(mTimingView);
+
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
             != PackageManager.PERMISSION_GRANTED) {
@@ -74,9 +93,6 @@ public class MainActivity extends Activity {
         switch (requestCode) {
             case REQUEST_CODE_READ_PHONE_STATE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    detectSandbox();
-                }
-                else {
                     detectSandbox();
                 }
                 return;
