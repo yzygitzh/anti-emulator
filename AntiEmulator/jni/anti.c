@@ -25,15 +25,20 @@ int setupSigTrap() {
 }
 
 // This will cause a SIGSEGV on some QEMU or be properly respected
+// Only enabled on ARM
 int tryBKPT() {
+#ifdef __arm__
   __asm__ __volatile__ ("bkpt 255");
+#else
+  return 0;
+#endif
 }
 
 jint Java_diff_strazzere_anti_emulator_FindEmulator_qemuBkpt(JNIEnv* env, jobject jObject) {
-  
+
   pid_t child = fork();
   int child_status, status = 0;
-  
+
   if(child == 0) {
     setupSigTrap();
     tryBKPT();
