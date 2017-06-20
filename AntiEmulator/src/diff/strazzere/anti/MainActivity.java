@@ -191,7 +191,7 @@ public class MainActivity extends Activity {
             detectedLog("Slow graphic was detected");
             return true;
         } else {
-            unDetectedLog("Slow graphic was detected");
+            unDetectedLog("Slow graphic was not detected");
             return false;
         }
     }

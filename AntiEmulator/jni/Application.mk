@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-APP_ABI := all
+APP_ABI := armeabi
 
 APP_PLATFORM := android-8
 
